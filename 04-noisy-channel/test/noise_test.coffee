@@ -1,7 +1,6 @@
 Noise = require '../src/noise'
 expect = require 'expect.js'
 
-
 describe 'Noise', ->
   describe 'xorBits', ->
     it 'should xor bit streams', ->
