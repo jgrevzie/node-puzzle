@@ -1,23 +1,46 @@
 Encoder = require '../src/encoder'
 expect = require 'expect.js'
+sinon = require 'sinon'
 
 describe 'Encoder', ->
-  describe 'rotate', ->
-    it 'rotates the array by the given number of places', ->
-      expect(new Encoder().rotate([1, 2, 3, 4], 1)).to.eql [2, 3, 4, 1]
 
-    it "will rotate the array backwards with negative argument", ->
-      expect(new Encoder().rotate([1, 2, 3, 4], -1)).to.eql [4, 1, 2, 3]
+  enc = new Encoder()
 
-  describe 'rotateMessage', ->
-    it 'returns message with chunks rotated', ->
-      enc = new Encoder()
-      bits = [1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4]
-      expect(enc.rotateMessage(bits, 1)).to.
-        eql [1, 2, 3, 4, 2, 3, 4, 1, 3, 4, 1, 2, 4, 1, 2, 3, 1, 2, 3, 4 ]
+  describe 'encode', ->
+    xit 'concats scrambled bits to the original message', ->
+      enc.scrambleBits = sinon.stub().returns('hello')
+      expect(enc.encode([1, 2, 3, 4])).to.eql Array(enc.N_REPEATS).fill('hello')
 
-    it 'returns message with chunks unrotated', ->
-      enc = new Encoder()
-      bits = [1, 2, 3, 4, 2, 3, 4, 1, 3, 4, 1, 2, 4, 1, 2, 3, 1, 2, 3, 4]
-      expect(enc.rotateMessage(bits, -1)).to.
-        eql [1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4]
+  describe 'unscrambleMessage', ->
+    xit 'calls unscramble on each frame of the message and returns result', ->
+      enc.unscrambleBits = sinon.stub().returns('hello')
+      expect(enc.unscrambleMessage([1, 2, 3, 4, 1, 2, 3, 4])).to.
+        eql ['hello', 'hello']
+
+    it 'gives original message (repeated) if given an encoded message', ->
+      message = [1, 2, 3, 4, 5]
+      encoded = enc.encode(message)
+      unscrambled = enc.unscrambleMessage(encoded)
+
+      messageRepeated = []
+      (messageRepeated = messageRepeated.concat(message)) \
+       for [1..enc.N_REPEATS]
+      expect(unscrambled).to.eql messageRepeated
+
+  describe 'scramble & unscramble', ->
+    it 'cancel each other out', ->
+      bits = [1,2,3,4,5]
+      scrambled = enc.scrambleBits(bits, 4)
+      unscrambled = enc.unscrambleBits(scrambled, 4)
+      expect(unscrambled).to.eql bits
+
+      scrambled = enc.scrambleBits(bits, 2)
+      unscrambled = enc.unscrambleBits(scrambled, 2)
+      expect(unscrambled).to.eql bits
+
+  describe 'averagedBitForIndex', ->
+    xit 'gets average across all frames for the bit in position n', ->
+      enc.N_REPEATS = 3
+      bits = [1, 0, 1, 0, 0, 1]
+      expect(enc.averagedBitForIndex(bits, 0)).to.eql 1
+      expect(enc.averagedBitForIndex(bits, 1)).to.eql 0

@@ -1,54 +1,51 @@
-module.exports = class Encoder
-  encode: (bits) ->
-    # TODO: variable # of repeats
-    console.log('encode', bits)
+SeededShuffle = require('seededshuffle')
 
-    encoded = this.rotateMessage(
-      bits.concat(bits).concat(bits).concat(bits).concat(bits).concat(bits),
-      1)
-    console.log('encoded', encoded)
+module.exports = class Encoder
+
+  constructor: ->
+    @N_REPEATS = 30
+
+  encode: (bits) ->
+    encoded = []
+    encoded = (encoded.concat( @scrambleBits(bits, i))) \
+      for i in [1..@N_REPEATS]
     encoded
 
   decode: (bits) ->
-    # TODO: variable # of repeats
-    console.log('decode', bits)
+    unscrambledMessage = @unscrambleMessage(bits)
+    @getAverageBits(unscrambledMessage)
 
-    bits = this.rotateMessage(bits, -1)
-    console.log('unrotated', bits)
+  scrambleBits: (bits, seed) ->
+    SeededShuffle.shuffle(bits.slice(), seed)
 
-    originalSize = bits.length / 6
-    decodedBits = (this.averageBitForPostion(i, bits) for i in [0..originalSize-1])
-    #console.log('decoded', decodedBits)
-    decodedBits
+  unscrambleBits: (bits, seed) ->
+    SeededShuffle.unshuffle(bits.slice(), seed)
 
-  averageBitForPostion: (i, bits) ->
-    originalSize = bits.length / 6
-    console.log('averaging',      bits[i],
-      bits[i+originalSize] ,
-          bits[i+2*originalSize] ,
-          bits[i+3*originalSize] ,
-          bits[i+4*originalSize] ,
-          bits[i+5*originalSize])
-    result = !!Math.round( (bits[i] +
-      bits[i+originalSize] +
-      bits[i+2*originalSize] +
-      bits[i+3*originalSize] +
-      bits[i+4*originalSize] +
-      bits[i+5*originalSize])/5 )
+  unscrambleMessage: (bits) ->
+    unscrambledMessage = Array(bits.length)
+    @unscrambleFrame(bits, unscrambledMessage, frameId) \
+      for frameId in [0...@N_REPEATS]
 
-    console.log('average = ', result)
-    result
+    unscrambledMessage
 
-  rotate: (bits, amount) ->
-    Array.prototype.unshift.apply(bits, bits.splice(amount, bits.length))
-    bits
+  getAverageBits: (bits) ->
+    # TODO: method
+    frameSize = bits.length / @N_REPEATS
+    averagedMessage = Array(frameSize)
+    (averagedMessage[index] = @averagedBitForIndex(bits, index)) \
+      for index in [0...frameSize]
 
-  rotateMessage: (bits, amount) ->
-    origSize = bits.length / 6
-    delta = if amount>0 then 1 else -1
-    bits[0..origSize-1].
-      concat(this.rotate(bits[origSize..(2*origSize-1)], amount)).
-      concat(this.rotate(bits[2*origSize..(3*origSize-1)], amount+=delta)).
-      concat(this.rotate(bits[3*origSize..(4*origSize-1)], amount+=delta)).
-      concat(this.rotate(bits[4*origSize..(5*origSize-1)], amount+=delta)).
-      concat(this.rotate(bits[5*origSize..(6*origSize-1)], amount+=delta))
+    averagedMessage
+
+  averagedBitForIndex: (bits, index) ->
+    frameSize = bits.length / @N_REPEATS
+    sum = 0
+    sum += bits[i] for i in [index...bits.length] by frameSize
+    !!Math.round( sum / @N_REPEATS)
+
+  unscrambleFrame: (scrambledMessage, unscrambledMessage, frameId) ->
+    frameSize = scrambledMessage.length / @N_REPEATS
+    startBit = frameId*frameSize
+    endBit = startBit + frameSize
+    unscrambledMessage[startBit...endBit] =
+      @unscrambleBits(scrambledMessage[startBit...endBit], frameId+1)
