@@ -16,13 +16,20 @@
  * @returns {object}          An order to be executed, can be null
 ###
 exports.tick = (price, candle, account) ->
-  r = Math.random()
-  amount = 1
+  # FIXME remove all the old comments :)
+  # if still have money, and awp is > 350 then sell everything
+  if price>300 then return buy: account.BTC / price
 
-  # Sell 1 dollar for equivalent amount of btc
-  if r < 0.33 and account.USD > amount then return sell: amount
+  if price<175 then return sell: account.USD
 
-  # Buy 1 dollar for equivalent amount of btc
-  if r < 0.66 and account.BTC > amount / price then return buy: amount
-
-  return null # do nothing
+  return null
+  # r = Math.random()
+  # amount = r*5.0
+  #
+  # # Sell 1 dollar for equivalent amount of btc
+  # if r < 0.00 and account.USD > amount then return sell: amount
+  #
+  # # Buy 1 dollar for equivalent amount of btc
+  # if r < 1 and account.BTC > amount / price then return buy: amount
+  #
+  # return null # do nothing
