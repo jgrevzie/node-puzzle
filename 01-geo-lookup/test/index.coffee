@@ -26,6 +26,7 @@ describe 'geo', ->
       assert.equal geo.lookup('5.135.39.188').country, 'FR'
       assert.equal geo.lookup('194.45.128.48').country, 'DE'
       assert.equal geo.lookup('91.238.130.1').country, 'GB'
+      assert.equal geo.lookup('5.239.0.0').country, 'IR'
 
     it 'should return null for unknown IP', ->
       result = geo.lookup '1.1.1.1'
@@ -41,3 +42,5 @@ describe 'geo', ->
       msec = Math.round (diff[0] * 1e9 + diff[1]) / 1e6
 
       assert msec < 500, "It is damn too slow: #{msec}ms for 10k lookups"
+
+  describe 'saveAddressRange'
