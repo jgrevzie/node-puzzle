@@ -5,6 +5,11 @@ module.exports = class Encoder
   constructor: ->
     @N_REPEATS = 30
 
+  # This approach is nice and simple.
+  # It can be made more robust simply by increasing N_REPEATS.
+  # Given more time I would have used a Hamming (7, 4) encoding.
+  # My approach is slow and wastes bandwidth.
+
   encode: (bits) ->
     encoded = []
     encoded = (encoded.concat( @scrambleBits(bits, i))) \
@@ -19,6 +24,8 @@ module.exports = class Encoder
     SeededShuffle.shuffle(bits.slice(), seed)
 
   unscrambleBits: (bits, seed) ->
+    # Using a random shuffle helps with 'noise' that occurs at regular intervals
+    # (ie isn't really noise :)
     SeededShuffle.unshuffle(bits.slice(), seed)
 
   unscrambleMessage: (bits) ->

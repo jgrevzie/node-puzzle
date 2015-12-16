@@ -42,5 +42,3 @@ describe 'geo', ->
       msec = Math.round (diff[0] * 1e9 + diff[1]) / 1e6
 
       assert msec < 500, "It is damn too slow: #{msec}ms for 10k lookups"
-
-  describe 'saveAddressRange'

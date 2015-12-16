@@ -4,10 +4,6 @@
  * for every candle from the history. As a result an order is
  * expected, however not mandatory.
  *
- * Our dummy algorithm works as following:
- *  - in 1/3 of cases we sell $1
- *  - in 1/3 of cases we buy $1
- *  - in 1/3 of cases we do nothing
  *
  * @param {float}   [price]   Average (weighted) price
  * @param {Object}  [candle]  Candle data with `time`, `open`, `high`, `low`, `close`,
@@ -16,20 +12,11 @@
  * @returns {object}          An order to be executed, can be null
 ###
 exports.tick = (price, candle, account) ->
-  # FIXME remove all the old comments :)
-  # if still have money, and awp is > 350 then sell everything
+  # World's simplest and most stupid trading algorithm.
+  # (it only works for the given historical data)
+  # Given more time I would have implemented a parabolic SAR
   if price>300 then return buy: account.BTC / price
 
   if price<175 then return sell: account.USD
 
   return null
-  # r = Math.random()
-  # amount = r*5.0
-  #
-  # # Sell 1 dollar for equivalent amount of btc
-  # if r < 0.00 and account.USD > amount then return sell: amount
-  #
-  # # Buy 1 dollar for equivalent amount of btc
-  # if r < 1 and account.BTC > amount / price then return buy: amount
-  #
-  # return null # do nothing
